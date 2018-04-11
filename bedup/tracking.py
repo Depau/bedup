@@ -545,6 +545,13 @@ def dedup_tracked1(ds, comm1):
                 elif e.errno == errno.ENOENT:
                     # The file was moved or unlinked by a racing process
                     ds.tt.notify('File %r may have moved, skipping' % path)
+                elif e.errno == errno.EPERM:
+                    if os.geteuid() == 0:
+                        # Probably immutable
+                        ds.tt.notify('Permission denied (immutable?) on %r, skipping' % path)
+                    else:
+                        ds.tt.notify('Permission denied on %r, you probably need to be root' % path)
+                        raise
                 else:
                     raise
                 ds.skip(inode)
