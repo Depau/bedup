@@ -26,6 +26,7 @@ import resource
 import stat
 import sys
 import threading
+import time
 
 from collections import defaultdict, namedtuple
 from contextlib import closing, contextmanager, ExitStack
@@ -158,6 +159,7 @@ def track_updated_files(sess, vol, tt):
     sk.max_offset = u64_max
     sk.max_transid = u64_max
     sk.max_type = lib.BTRFS_INODE_ITEM_KEY
+    last_update = time.time()
 
     while True:
         sk.nr_items = 4096
@@ -205,7 +207,9 @@ def track_updated_files(sess, vol, tt):
                 inode.has_updates = True
                 tt.update(retained=True)
         scanned += sk.nr_items
-        tt.update(scanned=scanned)
+        if time.time() - last_update >= 0.2:
+            tt.update(scanned=scanned)
+            last_update = time.time()
 
         sk.min_objectid = sh.objectid
         sk.min_type = sh.type
