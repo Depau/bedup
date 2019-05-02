@@ -85,11 +85,15 @@ def sql_setup(dbapi_con, con_record):
 
     # So that writers do not block readers
     # https://www.sqlite.org/wal.html
+    # WAL mode can not be set inside a trasaction, so disable transactions
+    old_isolation = dbapi_con.isolation_level
+    dbapi_con.isolation_level = None
     cur.execute('PRAGMA journal_mode = WAL')
     cur.execute('PRAGMA journal_mode')
     val = cur.fetchone()
     # SQLite 3.7 is required
     assert val == ('wal',), val
+    dbapi_con.isolation_level = old_isolation
 
 
 def get_session(args):
