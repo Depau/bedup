@@ -490,6 +490,8 @@ Fake inode updates from the latest dedup events (useful for benchmarking).""")
             return args.action(args)
         except IOError as err:
             if err.errno == errno.EPERM:
+                import traceback
+                traceback.print_exc()
                 sys.stderr.write(
                     "You need to run this command as root.\n")
                 return 1
