@@ -647,6 +647,11 @@ def dedup_fileset(ds, fileset, fd_names, fd_inodes, size):
                     'Error deduplicating, maybe a file is marked NODATACOW:\n'
                     '- %r\n- %r' % (sdesc, ddesc))
                 return
+            elif e.errno == errno.EPERM:
+                ds.tt.notify(
+                    'Error deduplicating, maybe a file is immutable:\n'
+                    '- %r\n- %r' % (sdesc, ddesc))
+                return
             raise
         if deduped:
             ds.tt.notify(
